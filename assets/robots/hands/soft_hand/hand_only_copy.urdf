@@ -1,0 +1,605 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="soft_hand_right_hand_only">
+  <link name="base_link">
+    <inertial>
+      <origin xyz="-0.00107591330704606 0.0602157979187562 0.00535241433960498" rpy="0 0 0" />
+      <mass value="0.07159" />
+      <inertia ixx="0.00053099" ixy="0.00003741" ixz="0.00000288" iyy="0.00020204" iyz="-0.00000817" izz="0.00071323" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/base_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb_link_1">
+    <inertial>
+      <origin xyz="-0.000226412738771394 0.0175408958405082 0.00463891942054738" rpy="0 0 0" />
+      <mass value="0.00608" />
+      <inertia ixx="0.00003292" ixy="0.00000942" ixz="0.00000000" iyy="0.00000364" iyz="0.00000002" izz="0.00003590" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/thumb_link_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/thumb_link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="thumb_joint_1" type="revolute">
+    <origin xyz="0.00370000000000005 0.078 0.00519999999999999" rpy="0 0 -1.5707963267949" />
+    <parent link="base_link" />
+    <child link="thumb_link_1" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="thumb_link_2">
+    <inertial>
+      <origin xyz="-0.000139719381694098 0.0172591580922161 0.00513230643483387" rpy="0 0 0" />
+      <mass value="0.00626" />
+      <inertia ixx="0.00003590" ixy="0.00000002" ixz="0.00000000" iyy="0.00000101" iyz="0.00000219" izz="0.00003555" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/thumb_link_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/thumb_link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="thumb_joint_2" type="revolute">
+    <origin xyz="0.000134721619996156 0.0352198393444275 0.00520000000000001" rpy="2.79252680319093 -1.5707963267949 0" />
+    <parent link="thumb_link_1" />
+    <child link="thumb_link_2" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="thumb_link_3">
+    <inertial>
+      <origin xyz="2.13906234059549E-05 0.0139021682913982 0.00411203004701091" rpy="0 0 0" />
+      <mass value="0.00402" />
+      <inertia ixx="0.00003582" ixy="-0.00000108" ixz="0.00000015" iyy="0.00000101" iyz="0.00000191" izz="0.00003564" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/thumb_link_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/thumb_link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="thumb_joint_3" type="revolute">
+    <origin xyz="-0.0026 0.0359371968514815 0.00143765018824065" rpy="0 0.5235987755983 0" />
+    <parent link="thumb_link_2" />
+    <child link="thumb_link_3" />
+    <axis xyz="1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="thumb_link_4">
+    <inertial>
+      <origin xyz="1.4425202060981E-05 0.0138913361178382 0.00460127404940413" rpy="0 0 0" />
+      <mass value="0.00474" />
+      <inertia ixx="0.00003582" ixy="-0.00000108" ixz="0.00000015" iyy="0.00000101" iyz="0.00000191" izz="0.00003564" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/thumb_link_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/thumb_link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="thumb_joint_4" type="revolute">
+    <origin xyz="0 0.0271938395294337 0" rpy="0 0 0" />
+    <parent link="thumb_link_3" />
+    <child link="thumb_link_4" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="index_link_1">
+    <inertial>
+      <origin xyz="7.34582052623958E-06 0.00998124103173685 -0.000753138181571604" rpy="0 0 0" />
+      <mass value="0.00285" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/index_link_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/index_link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="index_joint_1" type="revolute">
+    <origin xyz="0.0290264592497739 0.132227824075067 0.00740000000000001" rpy="0 0 -0.174532925199432" />
+    <parent link="base_link" />
+    <child link="index_link_1" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="index_link_2">
+    <inertial>
+      <origin xyz="-4.45939051352869E-06 0.0180285034379962 0.00419397703051187" rpy="0 0 0" />
+      <mass value="0.00542" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/index_link_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/index_link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="index_joint_2" type="revolute">
+    <origin xyz="0 0.021 -0.0052" rpy="0 0 0" />
+    <parent link="index_link_1" />
+    <child link="index_link_2" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="index_link_3">
+    <inertial>
+      <origin xyz="-4.33680868994202E-18 0.0152283515003216 0.00395398428215677" rpy="0 0 0" />
+      <mass value="0.00369" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/index_link_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/index_link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="index_joint_3" type="revolute">
+    <origin xyz="0 0.0368687904272322 0.000296635651980327" rpy="0 0 0" />
+    <parent link="index_link_2" />
+    <child link="index_link_3" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="index_link_4">
+    <inertial>
+      <origin xyz="-1.15218754068863E-09 0.0121089138242129 0.00398608556627066" rpy="0 0 0" />
+      <mass value="0.00302" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/index_link_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/index_link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="index_joint_4" type="revolute">
+    <origin xyz="0 0.0304312095727678 0.000503364348019689" rpy="0 0 0" />
+    <parent link="index_link_3" />
+    <child link="index_link_4" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="middle_link_1">
+    <inertial>
+      <origin xyz="7.34582052623828E-06 0.00998124103173684 -0.000753138181571605" rpy="0 0 0" />
+      <mass value="0.00285" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/middle_link_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/middle_link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="middle_joint_1" type="revolute">
+    <origin xyz="0.00792668643854304 0.134056317266317 0.0074" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="middle_link_1" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="middle_link_2">
+    <inertial>
+      <origin xyz="-3.90732225506556E-06 0.0197375527466092 0.00432598503053492" rpy="0 0 0" />
+      <mass value="0.00619" />
+      <inertia ixx="0.00001491" ixy="0.00000000" ixz="0.00000000" iyy="0.00000038" iyz="-0.00000010" izz="0.00001492" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/middle_link_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/middle_link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="middle_joint_2" type="revolute">
+    <origin xyz="0 0.021 -0.0052" rpy="0 0 0" />
+    <parent link="middle_link_1" />
+    <child link="middle_link_2" />
+    <axis xyz="1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="middle_link_3">
+    <inertial>
+      <origin xyz="-1.73472347597681E-18 0.0170249388865513 0.00408489337994659" rpy="0 0 0" />
+      <mass value="0.00435" />
+      <inertia ixx="0.00001491" ixy="0.00000000" ixz="0.00000000" iyy="0.00000038" iyz="-0.00000010" izz="0.00001492" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/middle_link_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/middle_link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="middle_joint_3" type="revolute">
+    <origin xyz="0 0.0403569419683146 0.00029689004278945" rpy="0 0 0" />
+    <parent link="middle_link_2" />
+    <child link="middle_link_3" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="middle_link_4">
+    <inertial>
+      <origin xyz="-3.90312782094782E-18 0.0121089069741908 0.00398608606992765" rpy="0 0 0" />
+      <mass value="0.00302" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/middle_link_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/middle_link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="middle_joint_4" type="revolute">
+    <origin xyz="0 0.0339430580316854 0.000503109957210555" rpy="0 0 0" />
+    <parent link="middle_link_3" />
+    <child link="middle_link_4" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="ring_link_1">
+    <inertial>
+      <origin xyz="7.34582052621681E-06 0.00998124103173681 -0.000753138181571607" rpy="0 0 0" />
+      <mass value="0.00285" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/ring_link_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/ring_link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="ring_joint_1" type="revolute">
+    <origin xyz="-0.0131700479232904 0.132193094439533 0.0074" rpy="0 0 0.174532925199432" />
+    <parent link="base_link" />
+    <child link="ring_link_1" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="ring_link_2">
+    <inertial>
+      <origin xyz="-4.45939051352826E-06 0.0180285034379961 0.00419397703051187" rpy="0 0 0" />
+      <mass value="0.00542" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/ring_link_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/ring_link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="ring_joint_2" type="revolute">
+    <origin xyz="0 0.021 -0.0052" rpy="0 0 0" />
+    <parent link="ring_link_1" />
+    <child link="ring_link_2" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="ring_link_3">
+    <inertial>
+      <origin xyz="-2.60208521396521E-18 0.0152283515003216 0.00395398428215676" rpy="0 0 0" />
+      <mass value="0.00369" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/ring_link_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/ring_link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="ring_joint_3" type="revolute">
+    <origin xyz="0 0.0368687904272322 0.000296635651980289" rpy="0 0 0" />
+    <parent link="ring_link_2" />
+    <child link="ring_link_3" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="ring_link_4">
+    <inertial>
+      <origin xyz="1.15218753060555E-09 0.0121089138242128 0.00398608748395716" rpy="0 0 0" />
+      <mass value="0.00302" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/ring_link_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/ring_link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="ring_joint_4" type="revolute">
+    <origin xyz="0 0.0304312095727678 0.00050336434801964" rpy="0 0 0" />
+    <parent link="ring_link_3" />
+    <child link="ring_link_4" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="little_link_1">
+    <inertial>
+      <origin xyz="7.34582052624305E-06 0.00998124103173681 -0.000753138181571604" rpy="0 0 0" />
+      <mass value="0.00285" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/little_link_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/little_link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="little_joint_1" type="revolute">
+    <origin xyz="-0.0336227302376028 0.126694768677472 0.00740000000000001" rpy="0 0 0.349065850398854" />
+    <parent link="base_link" />
+    <child link="little_link_1" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="little_link_2">
+    <inertial>
+      <origin xyz="-5.33895188253777E-06 0.0160364332506722 0.00399282351911505" rpy="0 0 0" />
+      <mass value="0.00452" />
+      <inertia ixx="0.00000972" ixy="0.00000000" ixz="0.00000000" iyy="0.00000030" iyz="-0.00000008" izz="0.00000973" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/little_link_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/little_link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="little_joint_2" type="revolute">
+    <origin xyz="0 0.021 -0.00520000000000001" rpy="0 0 0" />
+    <parent link="little_link_1" />
+    <child link="little_link_2" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="little_link_3">
+    <inertial>
+      <origin xyz="-4.33680868994202E-18 0.0130999746355155 0.00375300481992083" rpy="0 0 0" />
+      <mass value="0.00296" />
+      <inertia ixx="0.00000972" ixy="0.00000000" ixz="0.00000000" iyy="0.00000030" iyz="-0.00000008" izz="0.00000973" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/little_link_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/little_link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="little_joint_3" type="revolute">
+    <origin xyz="0 0.032882349965288 0.00029620483758994" rpy="0 0 0" />
+    <parent link="little_link_2" />
+    <child link="little_link_3" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+  <link name="little_link_4">
+    <inertial>
+      <origin xyz="1.20501740096673E-09 0.0121089190108057 0.00398608786062623" rpy="0 0 0" />
+      <mass value="0.00302" />
+      <inertia ixx="0.00001364" ixy="0.00000000" ixz="0.00000000" iyy="0.00000036" iyz="0.00000001" izz="0.00001365" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/little_link_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.2431 0.6275 0.9922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="soft_hand_meshes/little_link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="little_joint_4" type="revolute">
+    <origin xyz="0 0.0264176500347119 0.000503795162410104" rpy="0 0 0" />
+    <parent link="little_link_3" />
+    <child link="little_link_4" />
+    <axis xyz="-1 0 0" />
+    <limit effort="10" lower="-3.14" upper="3.14" velocity="3.14" />
+  </joint>
+</robot>

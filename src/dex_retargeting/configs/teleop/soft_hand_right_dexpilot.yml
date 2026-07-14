@@ -1,0 +1,23 @@
+retargeting:
+  type: DexPilot
+  urdf_path: soft_hand/soft_hand_right_hand_only.urdf
+
+  # 只优化手部 20 个关节（推荐）
+  target_joint_names: [
+    "thumb_joint_1", "thumb_joint_2", "thumb_joint_3", "thumb_joint_4",
+    "index_joint_1", "index_joint_2", "index_joint_3", "index_joint_4",
+    "middle_joint_1", "middle_joint_2", "middle_joint_3", "middle_joint_4",
+    "ring_joint_1", "ring_joint_2", "ring_joint_3", "ring_joint_4",
+    "little_joint_1", "little_joint_2", "little_joint_3", "little_joint_4"
+  ]
+
+  wrist_link_name: "base_link"
+  finger_tip_link_names: [
+    "thumb_tip", "index_tip", "middle_tip", "ring_tip", "little_tip"
+  ]
+
+  # Soft hand zero-pose wrist-to-fingertip vectors are roughly 2x the MediaPipe
+  # hand vectors in our debug clip. A too-small scale makes DexPilot shorten
+  # fingertips by over-bending joint_2 / joint_3.
+  scaling_factor: 1.6
+  low_pass_alpha: 0.2

@@ -1,0 +1,71 @@
+reference_vec_debug
+frame=0
+  index_tip -> thumb_tip target_dist=0.0916 ref_dist=0.1832 target_vec=[-0.0673, 0.0445, -0.0433] ref_vec=[-0.1346, 0.089, -0.0866]
+  middle_tip -> thumb_tip target_dist=0.1236 ref_dist=0.2472 target_vec=[-0.0793, 0.0737, -0.0597] ref_vec=[-0.1587, 0.1473, -0.1193]
+  ring_tip -> thumb_tip target_dist=0.1410 ref_dist=0.2820 target_vec=[-0.085, 0.1005, -0.0505] ref_vec=[-0.17, 0.2011, -0.101]
+  little_tip -> thumb_tip target_dist=0.1622 ref_dist=0.3245 target_vec=[-0.0727, 0.1404, -0.0361] ref_vec=[-0.1455, 0.2809, -0.0723]
+  middle_tip -> index_tip target_dist=0.0355 ref_dist=0.0710 target_vec=[-0.012, 0.0291, -0.0163] ref_vec=[-0.0241, 0.0583, -0.0327]
+  ring_tip -> index_tip target_dist=0.0592 ref_dist=0.1184 target_vec=[-0.0177, 0.056, -0.0072] ref_vec=[-0.0354, 0.1121, -0.0143]
+  little_tip -> index_tip target_dist=0.0963 ref_dist=0.1927 target_vec=[-0.0054, 0.0959, 0.0072] ref_vec=[-0.0109, 0.1918, 0.0144]
+  ring_tip -> middle_tip target_dist=0.0290 ref_dist=0.0579 target_vec=[-0.0057, 0.0269, 0.0092] ref_vec=[-0.0113, 0.0538, 0.0184]
+  little_tip -> middle_tip target_dist=0.0711 ref_dist=0.1422 target_vec=[0.0066, 0.0668, 0.0235] ref_vec=[0.0132, 0.1336, 0.047]
+  little_tip -> ring_tip target_dist=0.0441 ref_dist=0.0883 target_vec=[0.0123, 0.0399, 0.0143] ref_vec=[0.0245, 0.0798, 0.0287]
+project_dist=0.03 escape_dist=0.05 len_proj=10 len_s1=4 len_s2=6
+frame=0
+  dist=[0.0916, 0.1236, 0.141, 0.1622, 0.0355, 0.0592, 0.0963, 0.029, 0.0711, 0.0441]
+  projected=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  projected_count=0/10
+frame=1
+  dist=[0.0996, 0.1344, 0.1507, 0.1684, 0.04, 0.0647, 0.1016, 0.0303, 0.0745, 0.0458]
+  projected=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  projected_count=0/10
+frame=2
+  dist=[0.0968, 0.1319, 0.1479, 0.1653, 0.0408, 0.0648, 0.1013, 0.0291, 0.0727, 0.0453]
+  projected=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  projected_count=0/10
+frame=3
+  dist=[0.098, 0.1331, 0.1487, 0.1657, 0.0409, 0.0644, 0.1008, 0.0287, 0.0724, 0.0453]
+  projected=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  projected_count=0/10
+frame=4
+  dist=[0.0983, 0.1337, 0.1496, 0.1665, 0.0412, 0.0649, 0.1012, 0.0288, 0.0723, 0.0453]
+  projected=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  projected_count=0/10
+rotated_wrist_to_tip_alignment
+before lateral_coords={'thumb': -0.0317, 'index': 0.0984, 'middle': 0.1196, 'ring': 0.1284, 'little': 0.1003} order_high_to_low=['ring', 'middle', 'little', 'index', 'thumb']
+robot_zero lateral_coords={'thumb': -0.0414, 'index': 0.0613, 'middle': 0.0202, 'ring': -0.0221, 'little': -0.0594} order_high_to_low=['index', 'middle', 'ring', 'thumb', 'little']
+kabsch rotation_det=1.000000
+kabsch lateral_coords={'thumb': -0.1791, 'index': -0.0372, 'middle': 0.0116, 'ring': 0.0573, 'little': 0.0941} order_high_to_low=['little', 'ring', 'middle', 'index', 'thumb']
+before
+  base_link -> thumb_tip robot_dist=0.1173 ref_dist=0.2535 ratio_ref_over_robot=2.1618 cosine=0.7886
+  base_link -> index_tip robot_dist=0.2541 ref_dist=0.2860 ratio_ref_over_robot=1.1255 cosine=0.4193
+  base_link -> middle_tip robot_dist=0.2634 ref_dist=0.3100 ratio_ref_over_robot=1.1768 cosine=0.1580
+  base_link -> ring_tip robot_dist=0.2514 ref_dist=0.2954 ratio_ref_over_robot=1.1749 cosine=-0.0871
+  base_link -> little_tip robot_dist=0.2376 ref_dist=0.2746 ratio_ref_over_robot=1.1558 cosine=-0.4200
+kabsch
+  base_link -> thumb_tip robot_dist=0.1173 ref_dist=0.2535 ratio_ref_over_robot=2.1618 cosine=0.8505
+  base_link -> index_tip robot_dist=0.2541 ref_dist=0.2860 ratio_ref_over_robot=1.1255 cosine=0.9199
+  base_link -> middle_tip robot_dist=0.2634 ref_dist=0.3100 ratio_ref_over_robot=1.1768 cosine=0.9992
+  base_link -> ring_tip robot_dist=0.2514 ref_dist=0.2954 ratio_ref_over_robot=1.1749 cosine=0.9555
+  base_link -> little_tip robot_dist=0.2376 ref_dist=0.2746 ratio_ref_over_robot=1.1558 cosine=0.7633
+palm_frame rotation_det=1.000000
+palm_frame lateral_coords={'thumb': 0.1921, 'index': 0.0917, 'middle': 0.0316, 'ring': -0.023, 'little': -0.1004} order_high_to_low=['thumb', 'index', 'middle', 'ring', 'little']
+before
+  base_link -> thumb_tip robot_dist=0.1173 ref_dist=0.2535 ratio_ref_over_robot=2.1618 cosine=0.7886
+  base_link -> index_tip robot_dist=0.2541 ref_dist=0.2860 ratio_ref_over_robot=1.1255 cosine=0.4193
+  base_link -> middle_tip robot_dist=0.2634 ref_dist=0.3100 ratio_ref_over_robot=1.1768 cosine=0.1580
+  base_link -> ring_tip robot_dist=0.2514 ref_dist=0.2954 ratio_ref_over_robot=1.1749 cosine=-0.0871
+  base_link -> little_tip robot_dist=0.2376 ref_dist=0.2746 ratio_ref_over_robot=1.1558 cosine=-0.4200
+palm_frame
+  base_link -> thumb_tip robot_dist=0.1173 ref_dist=0.2535 ratio_ref_over_robot=2.1618 cosine=0.2340
+  base_link -> index_tip robot_dist=0.2541 ref_dist=0.2860 ratio_ref_over_robot=1.1255 cosine=0.9964
+  base_link -> middle_tip robot_dist=0.2634 ref_dist=0.3100 ratio_ref_over_robot=1.1768 cosine=0.9997
+  base_link -> ring_tip robot_dist=0.2514 ref_dist=0.2954 ratio_ref_over_robot=1.1749 cosine=0.9991
+  base_link -> little_tip robot_dist=0.2376 ref_dist=0.2746 ratio_ref_over_robot=1.1558 cosine=0.9924
+rotated_retarget_comparison
+baseline abs_j1_mean=1.2637 abs_j1_max=2.5005 abs_j23_mean=0.6528 abs_j23_max=2.4527
+baseline first[thumb1 thumb2 thumb3 index1 index2 index3 middle1 middle2 middle3 ring1 ring2 ring3 little1 little2 little3]=[0.6255, 0.2858, 0.0927, -0.8829, -1.3148, -0.1314, -1.7225, 1.1786, -0.0664, -2.2985, -0.913, 0.0379, 0.1082, -2.3125, -0.1907]
+kabsch abs_j1_mean=0.5657 abs_j1_max=1.2258 abs_j23_mean=0.1290 abs_j23_max=0.6275
+kabsch first[thumb1 thumb2 thumb3 index1 index2 index3 middle1 middle2 middle3 ring1 ring2 ring3 little1 little2 little3]=[-0.3721, -0.0314, 0.014, 0.6828, 0.2734, 0.0489, 0.0563, 0.001, 0.0048, -0.5421, -0.1777, -0.0229, -1.1523, -0.521, -0.0739]
+palm_frame abs_j1_mean=0.1941 abs_j1_max=0.4492 abs_j23_mean=0.2694 abs_j23_max=2.3179
+palm_frame first[thumb1 thumb2 thumb3 index1 index2 index3 middle1 middle2 middle3 ring1 ring2 ring3 little1 little2 little3]=[0.416, 2.2162, -0.3345, -0.1737, 0.0317, 0.0109, -0.0445, 0.0052, 0.0046, -0.006, -0.0944, -0.0071, 0.2599, 0.0319, 0.0116]

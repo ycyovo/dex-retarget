@@ -1,0 +1,13 @@
+**/*.mp4
+**/*.webp
+**/*.task
+**/*.pkl
+**/*.pkl.bak
+
+
+**/__pycache__/
+build/
+dist/
+*.egg-info/
+.DS_Store
+

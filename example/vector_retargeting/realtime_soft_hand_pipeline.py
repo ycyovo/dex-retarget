@@ -1,10 +1,13 @@
 import time
 from pathlib import Path
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import cv2
 import numpy as np
+import sapien
 import tyro
+from sapien.asset import create_dome_envmap
+from sapien.utils import Viewer
 
 from dex_retargeting.constants import (
     HandType,
@@ -52,6 +55,73 @@ def _build_ref_value(retargeting, joint_pos: np.ndarray):
     origin_indices = indices[0, :]
     task_indices = indices[1, :]
     return joint_pos[task_indices, :] - joint_pos[origin_indices, :]
+
+
+def _set_viewer_camera(viewer: Viewer, camera_view: str):
+    """Set a stable view centered on the hand root at the world origin."""
+    views = {
+        # Matches render_robot_hand.py: camera at +X looking toward the hand.
+        "profile": ((-0.15, 0.1, 0.20), ( -np.pi/2.0 , -np.pi / 3.0 , 0.0)),
+        # "profile": ((0.5, 0.0, 0.0), (0.0, 0.0, np.pi)),
+        # The palm normal is +Z. Viewer forward is local +X, so the palm view
+        # places the camera at -Z and pitches +X toward +Z.
+        "palm": ((0.0, 0.0, -0.5), (0.0, np.pi / 2.0, 0.0)),
+        # The back view places the camera at +Z and pitches +X toward -Z.
+        "back": ((0.0, 0.0, 0.5), (0.0, -np.pi / 2.0 , 0.0)),
+        # Fingers extend mainly along +Y. These views look from the finger
+        # tips (+Y) or wrist side (-Y), and are useful as end-on checks.
+        "top": ((0.0, 0.5, 0.0), (0.0, 0.0, np.pi / 2.0)),
+        "bottom": ((0.0, -0.5, 0.0), (0.0, 0.0, -np.pi / 2.0)),
+    }
+    position, rpy = views[camera_view]
+    viewer.set_camera_xyz(*position)
+    viewer.set_camera_rpy(*rpy)
+
+
+def _create_soft_hand_viewer(config, camera_view: str):
+    """Create the Task 4 SAPIEN view for the hand-only soft_hand URDF."""
+    sapien.render.set_viewer_shader_dir("default")
+    sapien.render.set_camera_shader_dir("default")
+
+    scene = sapien.Scene()
+    render_mat = sapien.render.RenderMaterial()
+    render_mat.base_color = [0.06, 0.08, 0.12, 1]
+    render_mat.roughness = 0.9
+    scene.add_ground(-0.2, render_material=render_mat, render_half_size=[1000, 1000])
+    scene.add_directional_light(np.array([1, 1, -1]), np.array([3, 3, 3]))
+    scene.add_point_light(np.array([2, 2, 2]), np.array([2, 2, 2]), shadow=False)
+    scene.add_point_light(np.array([2, -2, 2]), np.array([2, 2, 2]), shadow=False)
+    scene.set_environment_map(
+        create_dome_envmap(sky_color=[0.2, 0.2, 0.2], ground_color=[0.2, 0.2, 0.2])
+    )
+
+    loader = scene.create_urdf_loader()
+    loader.load_multiple_collisions_from_file = True
+    urdf_path = Path(config.urdf_path)
+    glb_path = urdf_path.with_name(f"{urdf_path.stem}_glb.urdf")
+    robot = loader.load(str(glb_path if glb_path.exists() else urdf_path))
+    if robot is None:
+        raise RuntimeError(f"Failed to load soft_hand URDF: {urdf_path}")
+    # Render root pose: world -> hand-only soft_hand/base_link.
+    robot.set_pose(sapien.Pose([0, 0, -0.1]))
+
+    viewer = Viewer()
+    viewer.set_scene(scene)
+    viewer.control_window.show_origin_frame = False
+    viewer.control_window.move_speed = 0.01
+    viewer.control_window.toggle_camera_lines(False)
+    _set_viewer_camera(viewer, camera_view)
+    return viewer, robot
+
+
+def _set_robot_qpos_by_name(robot, qpos: np.ndarray, retargeting_joint_names):
+    """Copy qpos by joint name so URDF and retargeting joint orders may differ."""
+    name_to_qpos = dict(zip(retargeting_joint_names, qpos))
+    robot_qpos = robot.get_qpos()
+    for sapien_index, joint in enumerate(robot.get_active_joints()):
+        if joint.get_name() in name_to_qpos:
+            robot_qpos[sapien_index] = name_to_qpos[joint.get_name()]
+    robot.set_qpos(robot_qpos)
 
 
 class RunningStats:
@@ -108,6 +178,8 @@ def run_pipeline(
     max_frames: int = 0,
     report_every: int = 60,
     display: bool = False,
+    sim_display: bool = False,
+    sim_camera_view: Literal["profile", "palm", "back", "top", "bottom"] = "profile",
     width: Optional[int] = None,
     height: Optional[int] = None,
     fps: Optional[float] = None,
@@ -123,6 +195,7 @@ def run_pipeline(
 
     config_path = get_default_config_path(
         RobotName.soft,
+        # RobotName.allegro,
         RetargetingType.dexpilot,
         HandType.right,
     )
@@ -135,6 +208,19 @@ def run_pipeline(
     fixed_qpos = _fixed_qpos_from_retargeting(retargeting)
     print("[soft_hand] Initializing MediaPipe hand detector.", flush=True)
     detector = SingleHandDetector(hand_type="Right", selfie=False)
+    # import ipdb; ipdb.set_trace()
+    viewer = None
+    robot = None
+    if sim_display:
+        try:
+            config = RetargetingConfig.load_from_file(config_path)
+            viewer, robot = _create_soft_hand_viewer(config, sim_camera_view)
+            print(
+                "[soft_hand] SAPIEN viewer ready "
+                f"(camera view: {sim_camera_view}). Close it or press 'q' to stop."
+            )
+        except Exception as exc:
+            raise RuntimeError(f"Failed to initialize SAPIEN viewer: {exc}") from exc
 
     print(f"[soft_hand] Opening camera/video source: {camera_source}", flush=True)
     cap = _open_video_capture(camera_source, width, height, fps)
@@ -142,7 +228,11 @@ def run_pipeline(
         raise RuntimeError(f"Could not open camera/video source: {camera_source}")
 
     print(f"[soft_hand] Config: {config_path}")
-    print("[soft_hand] Running front-half realtime pipeline without SAPIEN.")
+    print(
+        "[soft_hand] Running realtime pipeline with SAPIEN display."
+        if sim_display
+        else "[soft_hand] Running front-half realtime pipeline without SAPIEN."
+    )
     print("[soft_hand] Press 'q' in the OpenCV window to stop when --display is set.")
 
     stats = RunningStats()
@@ -153,6 +243,12 @@ def run_pipeline(
 
     try:
         while True:
+            if viewer is not None and viewer.closed:
+                print("[soft_hand] SAPIEN viewer closed.")
+                break
+            # Keep the SAPIEN event loop responsive even when no hand is detected.
+            if viewer is not None:
+                viewer.render()
             tic = time.perf_counter()
             ret, frame = cap.read()
             capture_dt = time.perf_counter() - tic
@@ -218,12 +314,17 @@ def run_pipeline(
 
             tic = time.perf_counter()
             try:
-                _ = retargeting.retarget(ref_value, fixed_qpos=fixed_qpos)
+                qpos = retargeting.retarget(ref_value, fixed_qpos=fixed_qpos)
             except Exception as exc:
                 stats.add_failure()
                 print(f"[soft_hand][WARN] Retargeting failed: {exc}")
                 continue
             stats.add_retarget(time.perf_counter() - tic)
+
+            if robot is not None:
+                _set_robot_qpos_by_name(robot, qpos, retargeting.joint_names)
+            if viewer is not None:
+                viewer.render()
 
             if report_every > 0 and stats.frames % report_every == 0:
                 _print_stats(stats, time.perf_counter() - start_s, "[soft_hand]")
@@ -233,6 +334,8 @@ def run_pipeline(
         cap.release()
         if display:
             cv2.destroyAllWindows()
+        if viewer is not None:
+            viewer.close()
 
     elapsed_s = time.perf_counter() - start_s
     _print_stats(stats, elapsed_s, "[soft_hand][final]")
@@ -244,19 +347,22 @@ def main(
     max_frames: int = 0,
     report_every: int = 60,
     display: bool = False,
+    sim_display: bool = False,
+    sim_camera_view: Literal["profile", "palm", "back", "top", "bottom"] = "profile",
     width: Optional[int] = None,
     height: Optional[int] = None,
     fps: Optional[float] = None,
 ):
     """
-    Run the Task 3 front-half realtime pipeline:
-    camera/video stream -> MediaPipe hand detection -> soft_hand DexPilot qpos.
+    Run the realtime pipeline: camera/video -> MediaPipe -> DexPilot qpos.
 
     Args:
         camera_source: OpenCV camera index or video path. Defaults to camera 0.
         max_frames: Stop after this many captured frames. 0 means run until stream ends.
         report_every: Print timing stats every N captured frames. 0 disables periodic reports.
         display: Show the camera image with MediaPipe hand skeleton overlay.
+        sim_display: Show the retargeted soft_hand qpos in a SAPIEN viewer.
+        sim_camera_view: SAPIEN camera view: profile, palm, back, top, or bottom.
         width: Optional requested capture width.
         height: Optional requested capture height.
         fps: Optional requested capture FPS.
@@ -266,6 +372,8 @@ def main(
         max_frames=max_frames,
         report_every=report_every,
         display=display,
+        sim_display=sim_display,
+        sim_camera_view=sim_camera_view,
         width=width,
         height=height,
         fps=fps,

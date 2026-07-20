@@ -19,3 +19,15 @@ python3 render_robot_hand.py \
   --output-video-path data/soft.mp4 \
   --headless \
   --apply-soft-hand-panda-mount
+
+
+# python3 realtime_soft_hand_pipeline.py \
+#   --camera-source 0 \
+python3 realtime_soft_hand_pipeline.py \
+  --camera-source data/human_hand_video.mp4 \
+  --width 640 \
+  --height 480 \
+  --fps 30 \
+  --display \
+  --sim-display \
+  --sim-camera-view profile

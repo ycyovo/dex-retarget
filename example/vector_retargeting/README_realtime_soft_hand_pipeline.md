@@ -119,3 +119,40 @@ MediaPipe wrist-frame -> soft_hand/base_link
 
 This alignment is required for realtime results to match the already validated
 offline `detect_from_video.py` soft_hand behavior.
+
+## Live SAPIEN Display
+
+Pass `--sim-display` to open a SAPIEN viewer alongside the optional OpenCV
+camera window. Each successful DexPilot result is copied to the hand-only
+soft_hand URDF by joint name and rendered immediately.
+
+```bash
+python3 example/vector_retargeting/realtime_soft_hand_pipeline.py \
+  --camera-source 0 \
+  --width 640 \
+  --height 480 \
+  --fps 30 \
+  --display \
+  --sim-display \
+  --sim-camera-view profile
+```
+
+This opens two windows:
+
+- OpenCV: live camera image with the MediaPipe hand skeleton.
+- SAPIEN: the retargeted soft_hand pose.
+
+`--sim-camera-view` controls the initial SAPIEN view:
+
+- `profile` (default): matches the side/profile view used by `render_robot_hand.py` (camera at `x=+0.5`).
+- `palm`: looks from `-Z` toward the palm surface (`+Z` normal).
+- `back`: looks from `+Z` toward the back of the hand.
+- `top`: looks from `+Y` toward the fingertips (an end-on check).
+- `bottom`: looks from `-Y` toward the wrist side (an end-on check).
+
+For example, use `--sim-camera-view top` to start from the top view.
+
+Click the OpenCV window and press `q` to stop normally. Closing the SAPIEN
+viewer also ends the processing loop. The SAPIEN window stays responsive while
+the hand is temporarily not detected; it holds the last valid qpos in that
+case.

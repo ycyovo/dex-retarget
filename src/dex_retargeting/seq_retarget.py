@@ -15,6 +15,7 @@ class SeqRetargeting:
         optimizer: Optimizer,
         has_joint_limits=True,
         lp_filter: Optional[LPFilter] = None,
+        joint_limits_override: Optional[np.ndarray] = None,
     ):
         self.optimizer = optimizer
         robot = self.optimizer.robot
@@ -25,9 +26,24 @@ class SeqRetargeting:
         joint_limits[:, 0] = -1e4  # a large value is equivalent to no limit
         joint_limits[:, 1] = 1e4
         if has_joint_limits:
-            joint_limits[:] = robot.joint_limits[:]
+            source_limits = (
+                robot.joint_limits
+                if joint_limits_override is None
+                else np.asarray(joint_limits_override, dtype=np.float64)
+            )
+            if source_limits.shape != robot.joint_limits.shape:
+                raise ValueError(
+                    f"joint_limits must have shape {robot.joint_limits.shape}, "
+                    f"got {source_limits.shape}"
+                )
+            if not np.isfinite(source_limits).all() or np.any(
+                source_limits[:, 0] > source_limits[:, 1]
+            ):
+                raise ValueError("joint_limits must be finite and ordered")
+            joint_limits[:] = source_limits
             self.optimizer.set_joint_limit(joint_limits[self.optimizer.idx_pin2target])
         self.joint_limits = joint_limits[self.optimizer.idx_pin2target]
+        self.fixed_joint_limits = joint_limits[self.optimizer.idx_pin2fixed]
 
         # Temporal information
         self.last_qpos = joint_limits.mean(1)[self.optimizer.idx_pin2target].astype(

@@ -1,0 +1,92 @@
+(dexmachina) pair@pair-JIAOLONG-Series:~/proj/dex-retarget/example/vector_retargeting$   python realtime_allegro_genesis_pipeline.py \
+    --camera-source 0 \
+    --width 640 \
+    --height 480 \
+    --fps 30 \
+    --backend cpu \
+    --display
+[allegro] Loading retargeting config: /home/pair/anaconda3/envs/dexmachina/lib/python3.10/site-packages/dex_retargeting/configs/teleop/allegro_hand_right_dexpilot.yml
+[allegro] Initializing MediaPipe hand detector.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1786426446.704549   10434 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1786426446.722790   10434 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+[allegro] Initializing Genesis with URDF: /home/pair/proj/dex-retarget/assets/robots/hands/allegro_hand/allegro_hand_right.urdf
+[Genesis] [13:34:09] [INFO] ╭───────────────────────────────────────────────╮
+[Genesis] [13:34:09] [INFO] │┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈ Genesis ┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈│
+[Genesis] [13:34:09] [INFO] ╰───────────────────────────────────────────────╯
+[Genesis] [13:34:10] [INFO] Consider setting 'performance_mode=True' in production to maximise runtime speed, if significantly increasing compilation time is not a concern.
+[Genesis] [13:34:10] [INFO] Running on [AMD Ryzen 9 8940HX with Radeon Graphics] with backend gs.cpu. Device memory: 30.56 GB.
+[Genesis] [13:34:10] [INFO] 🚀 Genesis initialized. 🔖 version: 0.3.3, 🌱 seed: None, 📏 precision: '32', 🐛 debug: False, 🎨 theme: 'dark'.
+[Genesis] [13:34:10] [WARNING] Scene.show_FPS is deprecated. Please use Scene.profiling_options.show_FPS
+[Genesis] [13:34:10] [INFO] Scene <285962e> created.
+[Genesis] [13:34:10] [INFO] Adding <gs.RigidEntity>. idx: 0, uid: <1b0380a>, morph: <gs.morphs.URDF(file='/home/pair/proj/dex-retarget/assets/robots/hands/allegro_hand/allegro_hand_right.urdf')>, material: <gs.materials.Rigid>.
+[Genesis] [13:34:10] [INFO] Falling back to legacy URDF parser. Default values of physics properties may be off.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [WARNING] Some free joint has non-zero frictionloss, damping or armature parameters. Beware it is non-physical.
+[Genesis] [13:34:10] [INFO] Applying offset to base link's pose with user provided value in morph.
+[Genesis] [13:34:11] [INFO] Building scene <285962e>...
+Traceback (most recent call last):
+  File "/home/pair/proj/dex-retarget/example/vector_retargeting/realtime_allegro_genesis_pipeline.py", line 497, in <module>
+    tyro.cli(main)
+  File "/home/pair/anaconda3/envs/dexmachina/lib/python3.10/site-packages/tyro/_cli.py", line 322, in cli
+    out = run_with_args_from_cli()
+  File "/home/pair/proj/dex-retarget/example/vector_retargeting/realtime_allegro_genesis_pipeline.py", line 470, in main
+    run_pipeline(
+  File "/home/pair/proj/dex-retarget/example/vector_retargeting/realtime_allegro_genesis_pipeline.py", line 336, in run_pipeline
+    simulation = GenesisAllegroSimulation(
+  File "/home/pair/proj/dex-retarget/example/vector_retargeting/realtime_allegro_genesis_pipeline.py", line 165, in __init__
+    self.scene.build(n_envs=1)
+  File "/home/pair/proj/dexma/Genesis/genesis/utils/misc.py", line 138, in wrapper
+    return method(self, *args, **kwargs)
+  File "/home/pair/proj/dexma/Genesis/genesis/engine/scene.py", line 780, in build
+    self._sim.build()
+  File "/home/pair/proj/dexma/Genesis/genesis/engine/simulator.py", line 203, in build
+    solver.build()
+  File "/home/pair/proj/dexma/Genesis/genesis/engine/solvers/rigid/rigid_solver_decomp.py", line 297, in build
+    self._init_link_fields()
+  File "/home/pair/proj/dexma/Genesis/genesis/engine/solvers/rigid/rigid_solver_decomp.py", line 626, in _init_link_fields
+    kernel_init_link_fields(
+  File "/home/pair/anaconda3/envs/dexmachina/lib/python3.10/site-packages/gstaichi/lang/kernel_impl.py", line 161, in __call__
+    return self.wrapper.__call__(*args, **kwargs)
+  File "/home/pair/anaconda3/envs/dexmachina/lib/python3.10/site-packages/gstaichi/lang/kernel_impl.py", line 1253, in wrapped_func
+    raise type(e)("\n" + str(e)) from None
+gstaichi.lang.exception.GsTaichiIndexError: 
+File "/home/pair/proj/dexma/Genesis/genesis/engine/solvers/rigid/rigid_solver_decomp.py", line 2838, in kernel_init_link_fields:
+            links_info.inertial_quat[I][j] = links_inertial_quat[i, j]
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/pair/proj/dexma/Genesis/genesis/engine/solvers/rigid/rigid_solver_decomp.py", line 2838, in kernel_init_link_fields:
+            links_info.inertial_quat[I][j] = links_inertial_quat[i, j]
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+Array with dim 1 accessed with indices of dim 2
+
+[Genesis] [13:34:11] [ERROR] GsTaichiIndexError: 
+File "/home/pair/proj/dexma/Genesis/genesis/engine/solvers/rigid/rigid_solver_decomp.py", line 2838, in kernel_init_link_fields:
+            links_info.inertial_quat[I][j] = links_inertial_quat[i, j]
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/pair/proj/dexma/Genesis/genesis/engine/solvers/rigid/rigid_solver_decomp.py", line 2838, in kernel_init_link_fields:
+            links_info.inertial_quat[I][j] = links_inertial_quat[i, j]
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+Array with dim 1 accessed with indices of dim 2
+[Genesis] [13:34:11] [INFO] 💤 Exiting Genesis and caching compiled kernels...
+Exception ignored in: <function HandLandmarker.__del__ at 0x7275992baa70>
+Traceback (most recent call last):
+  File "/home/pair/anaconda3/envs/dexmachina/lib/python3.10/site-packages/mediapipe/tasks/python/vision/hand_landmarker.py", line 612, in __del__
+  File "/home/pair/anaconda3/envs/dexmachina/lib/python3.10/site-packages/mediapipe/tasks/python/vision/hand_landmarker.py", line 588, in close
+  File "/home/pair/anaconda3/envs/dexmachina/lib/python3.10/site-packages/mediapipe/tasks/python/core/serial_dispatcher.py", line 74, in shutdown_aware_handler
+  File "/home/pair/anaconda3/envs/dexmachina/lib/python3.10/site-packages/mediapipe/tasks/python/core/mediapipe_c_utils.py", line 126, in dispatcher_wrapper
+TypeError: 'NoneType' object is not callable

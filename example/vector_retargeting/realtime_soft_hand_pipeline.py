@@ -314,6 +314,7 @@ def run_pipeline(
 
             tic = time.perf_counter()
             try:
+                import ipdb; ipdb.set_trace()
                 qpos = retargeting.retarget(ref_value, fixed_qpos=fixed_qpos)
             except Exception as exc:
                 stats.add_failure()

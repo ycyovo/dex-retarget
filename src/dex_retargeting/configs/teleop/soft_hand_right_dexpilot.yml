@@ -19,5 +19,38 @@ retargeting:
   # Soft hand zero-pose wrist-to-fingertip vectors are roughly 2x the MediaPipe
   # hand vectors in our debug clip. A too-small scale makes DexPilot shorten
   # fingertips by over-bending joint_2 / joint_3.
-  scaling_factor: 1.6
+  scaling_factor: 1.48
   low_pass_alpha: 0.2
+
+  # Optional per-joint qpos limits in radians. Values may only tighten the
+  # limits declared by the URDF. Keep empty until pneumatic calibration is
+  # available; for example: index_joint_1: [0.0, 0.0]
+  joint_limits: {
+    index_joint_1: [0.0, 0.0],
+    middle_joint_1: [0.0, 0.0],
+    ring_joint_1: [0.0, 0.0],
+    little_joint_1: [0.0, 0.0],
+
+    thumb_joint_1: [-0.6109,0.0], 
+    thumb_joint_2: [1.3963, 2.0944], 
+    thumb_joint_1: [-1.5708,0.0], 
+    thumb_joint_2: [0, 2.3944], 
+    thumb_joint_3: [0.0, 1.5708], 
+    thumb_joint_4: [-1.5708,0.0], 
+
+    index_joint_2: [-1.5708,0.0], 
+    index_joint_3: [-1.5708,0.0], 
+    index_joint_4: [-1.5708,0.0], 
+
+    middle_joint_2: [0.0, 1.5708], 
+    middle_joint_3: [-1.5708,0.0], 
+    middle_joint_4: [-1.5708,0.0], 
+
+    ring_joint_2: [-1.5708,0.0],
+    ring_joint_3: [-1.5708,0.0],
+    ring_joint_4: [-1.5708,0.0],
+
+    little_joint_2: [-1.5708,0.0],
+    little_joint_3: [-1.5708,0.0],
+    little_joint_4: [-1.5708,0.0]
+  }

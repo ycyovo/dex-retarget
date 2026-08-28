@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any, Tuple, Sequence
 from typing import Union
 
 import numpy as np
@@ -55,6 +55,9 @@ class RetargetingConfig:
 
     # Joint limit tag
     has_joint_limits: bool = True
+
+    # Optional per-joint limits in radians. These may only tighten URDF limits.
+    joint_limits: Optional[Dict[str, Sequence[float]]] = None
 
     # Mimic joint tag
     ignore_mimic_joint: bool = False
@@ -186,6 +189,35 @@ class RetargetingConfig:
         # Load pinocchio model
         robot = RobotWrapper(temp_path)
 
+        effective_joint_limits = robot.joint_limits.copy()
+        if self.joint_limits is not None:
+            if not self.has_joint_limits:
+                raise ValueError(
+                    "joint_limits cannot be used when has_joint_limits is false"
+                )
+            robot_joint_names = robot.dof_joint_names
+            for joint_name, limits in self.joint_limits.items():
+                if joint_name not in robot_joint_names:
+                    raise ValueError(
+                        f"joint_limits contains unknown joint: {joint_name}"
+                    )
+                values = np.asarray(limits, dtype=np.float64)
+                if values.shape != (2,) or not np.isfinite(values).all():
+                    raise ValueError(
+                        f"joint limit for {joint_name} must be two finite values"
+                    )
+                lower, upper = values
+                index = robot_joint_names.index(joint_name)
+                urdf_lower, urdf_upper = effective_joint_limits[index]
+                if lower > upper:
+                    raise ValueError(f"joint limit for {joint_name} must be ordered")
+                if lower < urdf_lower or upper > urdf_upper:
+                    raise ValueError(
+                        f"joint limit for {joint_name} must be within URDF range "
+                        f"[{urdf_lower}, {urdf_upper}]"
+                    )
+                effective_joint_limits[index] = (lower, upper)
+
         # Add 6D dummy joint to target joint names so that it will also be optimized
         if self.add_dummy_free_joint and self.target_joint_names is not None:
             self.target_joint_names = DUMMY_JOINT_NAMES + self.target_joint_names
@@ -253,6 +285,7 @@ class RetargetingConfig:
             optimizer,
             has_joint_limits=self.has_joint_limits,
             lp_filter=lp_filter,
+            joint_limits_override=effective_joint_limits,
         )
         return retargeting
 

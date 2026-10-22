@@ -2,7 +2,7 @@ retargeting:
   type: DexPilot
   urdf_path: soft_hand/soft_hand_right_hand_only.urdf
 
-  # 只优化手部 20 个关节（推荐）
+  # 手部 20 个输出关节；开启下面四个联动后，独立优化变量为 16 个。
   target_joint_names: [
     "thumb_joint_1", "thumb_joint_2", "thumb_joint_3", "thumb_joint_4",
     "index_joint_1", "index_joint_2", "index_joint_3", "index_joint_4",
@@ -10,6 +10,15 @@ retargeting:
     "ring_joint_1", "ring_joint_2", "ring_joint_3", "ring_joint_4",
     "little_joint_1", "little_joint_2", "little_joint_3", "little_joint_4"
   ]
+
+  # 硬件联动：DIP = 2/3 * PIP。q4 和 q3 的屈曲符号相同，偏移为 0 rad。
+  # 从优化变量中移除 DIP，每次 FK/梯度和最终输出都由 PIP 推导 DIP。
+  # 不受 joint_angle_weight 控制；设 joint_couplings: {} 可关闭全部联动。
+  # joint_couplings:
+  #   index_joint_4: {source: index_joint_3, multiplier: 0.6666666666666666, offset: 0.0}
+  #   middle_joint_4: {source: middle_joint_3, multiplier: 0.6666666666666666, offset: 0.0}
+  #   ring_joint_4: {source: ring_joint_3, multiplier: 0.6666666666666666, offset: 0.0}
+  #   little_joint_4: {source: little_joint_3, multiplier: 0.6666666666666666, offset: 0.0}
 
   wrist_link_name: "base_link"
   finger_tip_link_names: [
@@ -19,24 +28,91 @@ retargeting:
   # Soft hand zero-pose wrist-to-fingertip vectors are roughly 2x the MediaPipe
   # hand vectors in our debug clip. A too-small scale makes DexPilot shorten
   # fingertips by over-bending joint_2 / joint_3.
-  scaling_factor: 1.48
+  scaling_factor: 1.5
   low_pass_alpha: 0.2
+  # project_dist: 0.0
+
+  # 比较几何夹角：L = L_DexPilot + weight * mean(((theta_robot - theta_human) / range)^2).
+  # 0 完全关闭新增项，保持现有 DexPilot 行为。
+  joint_angle_weight: 1
+
+  # 按几何夹角名称覆盖归一化跨度，单位 rad，范围 (0, pi]。
+  # 默认全部用 pi（无符号夹角域 [0, pi]），不再从机器人 qpos 限位推断。
+  # 例如 index_pip: 1.5708 可在测量该几何夹角的活动跨度后填写。
+  joint_angle_ranges: {}
+
+  # 每项配对人手/机器人两侧的三个点，统一比较 a->b 与 b->c 的无符号夹角。
+  # 伸直为 0；不使用 scale、offset，也不直接比较机器人关节角 q。
+  # robot_links 使用 URDF link 原点；根部以 base_link 为腕点近似。
+  # 每指三个几何角，共 15 项；根部两个自由度共同影响同一个几何角。
+  # 机器人根部使用 link_2 作为屈曲中心，link_3 作为近端指骨末点。
+  joint_angle_mapping:
+    thumb_base:
+      human_indices: [0, 1, 2]
+      robot_links: [base_link, thumb_link_2, thumb_link_3]
+    thumb_mcp:
+      human_indices: [1, 2, 3]
+      robot_links: [thumb_link_2, thumb_link_3, thumb_link_4]
+    thumb_ip:
+      human_indices: [2, 3, 4]
+      robot_links: [thumb_link_3, thumb_link_4, thumb_tip]
+    index_base:
+      human_indices: [0, 5, 6]
+      robot_links: [base_link, index_link_2, index_link_3]
+    index_pip:
+      human_indices: [5, 6, 7]
+      robot_links: [index_link_2, index_link_3, index_link_4]
+    index_dip:
+      human_indices: [6, 7, 8]
+      robot_links: [index_link_3, index_link_4, index_tip]
+    middle_base:
+      human_indices: [0, 9, 10]
+      robot_links: [base_link, middle_link_2, middle_link_3]
+    middle_pip:
+      human_indices: [9, 10, 11]
+      robot_links: [middle_link_2, middle_link_3, middle_link_4]
+    middle_dip:
+      human_indices: [10, 11, 12]
+      robot_links: [middle_link_3, middle_link_4, middle_tip]
+    ring_base:
+      human_indices: [0, 13, 14]
+      robot_links: [base_link, ring_link_2, ring_link_3]
+    ring_pip:
+      human_indices: [13, 14, 15]
+      robot_links: [ring_link_2, ring_link_3, ring_link_4]
+    ring_dip:
+      human_indices: [14, 15, 16]
+      robot_links: [ring_link_3, ring_link_4, ring_tip]
+    little_base:
+      human_indices: [0, 17, 18]
+      robot_links: [base_link, little_link_2, little_link_3]
+    little_pip:
+      human_indices: [17, 18, 19]
+      robot_links: [little_link_2, little_link_3, little_link_4]
+    little_dip:
+      human_indices: [18, 19, 20]
+      robot_links: [little_link_3, little_link_4, little_tip]
 
   # Optional per-joint qpos limits in radians. Values may only tighten the
   # limits declared by the URDF. Keep empty until pneumatic calibration is
   # available; for example: index_joint_1: [0.0, 0.0]
   joint_limits: {
-    index_joint_1: [0.0, 0.0],
-    middle_joint_1: [0.0, 0.0],
-    ring_joint_1: [0.0, 0.0],
-    little_joint_1: [0.0, 0.0],
+    # index_joint_1: [-0.31, 0.31],
+    # middle_joint_1: [-0.31, 0.31],
+    # ring_joint_1: [-0.31, 0.31],
+    # little_joint_1: [-0.31, 0.31],
+    index_joint_1: [0, 0],
+    middle_joint_1: [0, 0],
+    ring_joint_1: [0, 0],
+    little_joint_1: [0, 0],
+    # 18 degree
 
-    thumb_joint_1: [-0.6109,0.0], 
-    thumb_joint_2: [1.3963, 2.0944], 
-    thumb_joint_1: [-1.5708,0.0], 
-    thumb_joint_2: [0, 2.3944], 
-    thumb_joint_3: [0.0, 1.5708], 
-    thumb_joint_4: [-1.5708,0.0], 
+    thumb_joint_1: [-1.1,0.0],
+    thumb_joint_2: [1.2, 2.0944],
+    # thumb_joint_1: [-1.5708,0.0],
+    # thumb_joint_2: [0, 2.3944],
+    thumb_joint_3: [0.0, 1.23],
+    thumb_joint_4: [-1.23,0.0],
 
     index_joint_2: [-1.5708,0.0], 
     index_joint_3: [-1.5708,0.0], 

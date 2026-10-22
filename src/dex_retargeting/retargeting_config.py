@@ -53,6 +53,15 @@ class RetargetingConfig:
     project_dist: float = 0.03
     escape_dist: float = 0.05
 
+    # Optional DexPilot bone-angle loss. Zero preserves the existing objective.
+    joint_angle_weight: float = 0.0
+    joint_angle_ranges: Optional[Dict[str, float]] = None
+    joint_angle_mapping: Optional[Dict[str, Dict[str, Any]]] = None
+
+    # Hard affine coupling: follower = multiplier * source + offset (radians).
+    # Followers are removed from optimization variables, but retained in output.
+    joint_couplings: Optional[Dict[str, Dict[str, Any]]] = None
+
     # Joint limit tag
     has_joint_limits: bool = True
 
@@ -73,6 +82,10 @@ class RetargetingConfig:
         self.type = self.type.lower()
         if self.type not in self._TYPE:
             raise ValueError(f"Retargeting type must be one of {self._TYPE}")
+        if not np.isfinite(self.joint_angle_weight) or self.joint_angle_weight < 0:
+            raise ValueError("joint_angle_weight must be finite and nonnegative")
+        if self.joint_angle_weight > 0 and self.type != "dexpilot":
+            raise ValueError("joint_angle_weight is supported only for DexPilot")
 
         # Vector retargeting requires: target_origin_link_names + target_task_link_names
         # Position retargeting requires: target_link_names
@@ -227,6 +240,31 @@ class RetargetingConfig:
             else robot.dof_joint_names
         )
 
+        # Merge explicit hardware couplings with the existing URDF mimic model.
+        _, source_names, mimic_names, multipliers, offsets = (
+            parse_mimic_joint(robot_urdf)
+        )
+        if self.ignore_mimic_joint:
+            source_names, mimic_names, multipliers, offsets = [], [], [], []
+        if self.joint_couplings:
+            if not self.has_joint_limits:
+                raise ValueError("joint_couplings requires has_joint_limits=true")
+            joint_names, effective_joint_limits = configure_joint_couplings(
+                robot, joint_names, effective_joint_limits, self.joint_couplings,
+                source_names, mimic_names, multipliers, offsets,
+            )
+
+        # Geometry spans belong to angle terms, independently of qpos limits.
+        angle_prior = None
+        if self.joint_angle_weight > 0:
+            from dex_retargeting.joint_angle_prior import BoneAnglePrior
+
+            angle_prior = BoneAnglePrior(
+                weight=self.joint_angle_weight,
+                ranges=self.joint_angle_ranges,
+                mapping=self.joint_angle_mapping,
+            )
+
         if self.type == "position":
             optimizer = PositionOptimizer(
                 robot,
@@ -261,16 +299,20 @@ class RetargetingConfig:
         else:
             raise RuntimeError()
 
+        if angle_prior is not None:
+            optimizer.set_joint_angle_prior(angle_prior)
+
+        # Expose the hardware model to output adapters, without depending on
+        # optimizer-internal joint ordering or the YAML target list.
+        optimizer.joint_couplings = self.joint_couplings or {}
+
         if 0 <= self.low_pass_alpha <= 1:
             lp_filter = LPFilter(self.low_pass_alpha)
         else:
             lp_filter = None
 
-        # Parse mimic joints and set kinematics adaptor for optimizer
-        has_mimic_joints, source_names, mimic_names, multipliers, offsets = (
-            parse_mimic_joint(robot_urdf)
-        )
-        if has_mimic_joints and not self.ignore_mimic_joint:
+        # Both FK and Jacobians include the follower's motion via the source.
+        if mimic_names:
             adaptor = MimicJointKinematicAdaptor(
                 robot,
                 target_joint_names=joint_names,
@@ -286,6 +328,7 @@ class RetargetingConfig:
             has_joint_limits=self.has_joint_limits,
             lp_filter=lp_filter,
             joint_limits_override=effective_joint_limits,
+            strict_joint_limits=bool(self.joint_couplings),
         )
         return retargeting
 
@@ -293,6 +336,69 @@ class RetargetingConfig:
 def get_retargeting_config(config_path: Union[str, Path]) -> RetargetingConfig:
     config = RetargetingConfig.load_from_file(config_path)
     return config
+
+
+def configure_joint_couplings(
+    robot, joint_names, joint_limits, couplings,
+    source_names, mimic_names, multipliers, offsets,
+):
+    """Validate couplings and intersect source limits with follower limits.
+
+    Only direct couplings from independently optimized sources are supported.
+    The four lists also contain active URDF mimic relations and are extended
+    here so one kinematic adaptor handles both kinds of linkage.
+    """
+    if not isinstance(couplings, dict):
+        raise ValueError("joint_couplings must be a mapping keyed by follower joint")
+    robot_names = robot.dof_joint_names
+    target_names = list(joint_names)
+    for follower, spec in couplings.items():
+        if not isinstance(spec, dict) or not {"source", "multiplier"} <= set(spec):
+            raise ValueError(f"Coupling {follower} requires source and multiplier")
+        if set(spec) - {"source", "multiplier", "offset"}:
+            raise ValueError(f"Unknown coupling fields for {follower}")
+        source = spec["source"]
+        if follower not in robot_names or source not in robot_names:
+            raise ValueError(f"Unknown coupling joint: {source} -> {follower}")
+        if follower in mimic_names:
+            raise ValueError(f"Coupling follower {follower} already has a URDF mimic")
+        if follower not in target_names or source not in target_names:
+            raise ValueError(f"Coupling source/follower must be target joints: {source} -> {follower}")
+        multiplier = float(spec["multiplier"])
+        offset = float(spec.get("offset", 0.0))
+        if not np.isfinite([multiplier, offset]).all():
+            raise ValueError(f"Coupling coefficients must be finite: {follower}")
+        source_names.append(source)
+        mimic_names.append(follower)
+        multipliers.append(multiplier)
+        offsets.append(offset)
+
+    if set(source_names) & set(mimic_names):
+        raise ValueError("Coupling chains/cycles are unsupported; sources must be independent")
+    limits = joint_limits.copy()
+    for source, follower, multiplier, offset in zip(
+        source_names, mimic_names, multipliers, offsets
+    ):
+        if source not in target_names:
+            raise ValueError(f"Coupling source must be optimized: {source}")
+        source_id = robot_names.index(source)
+        follower_id = robot_names.index(follower)
+        follower_lower, follower_upper = limits[follower_id]
+        if multiplier == 0:
+            if not follower_lower <= offset <= follower_upper:
+                raise ValueError(f"Infeasible constant coupling for {follower}")
+            continue
+        with np.errstate(over="ignore", invalid="ignore"):
+            allowed = np.sort((limits[follower_id] - offset) / multiplier)
+        if not np.isfinite(allowed).all():
+            raise ValueError(f"Coupling limit transformation is not finite: {follower}")
+        lower = max(limits[source_id, 0], allowed[0])
+        upper = min(limits[source_id, 1], allowed[1])
+        if lower > upper:
+            raise ValueError(f"Infeasible joint limits for coupling {source} -> {follower}")
+        limits[source_id] = (lower, upper)
+    target_names = [name for name in target_names if name not in couplings]
+    return target_names, limits
 
 
 def parse_mimic_joint(

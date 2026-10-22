@@ -51,6 +51,8 @@ class Optimizer:
 
         # Kinematics adaptor
         self.adaptor: Optional[KinematicAdaptor] = None
+        # Optional normalized bone-angle objective, configured only for DexPilot.
+        self.joint_angle_prior = None
 
     def set_joint_limit(self, joint_limits: np.ndarray, epsilon=1e-3):
         if joint_limits.shape != (self.opt_dof, 2):
@@ -75,13 +77,14 @@ class Optimizer:
             )
             self.idx_pin2fixed = new_fixed_id
 
-    def retarget(self, ref_value, fixed_qpos, last_qpos):
+    def retarget(self, ref_value, fixed_qpos, last_qpos, reference_angles=None):
         """
         Compute the retargeting results using non-linear optimization
         Args:
             ref_value: the reference value in cartesian space as input, different optimizer has different reference
             fixed_qpos: the fixed value (not optimized) in retargeting, consistent with self.fixed_joint_names
             last_qpos: the last retargeting results or initial value, consistent with function return
+            reference_angles: optional unsigned bone angles in joint_angle_mapping order
 
         Returns: joint position of robot, the joint order and dim is consistent with self.target_joint_names
 
@@ -90,8 +93,14 @@ class Optimizer:
             raise ValueError(
                 f"Optimizer has {len(self.idx_pin2fixed)} joints but non_target_qpos {fixed_qpos} is given"
             )
+        reference_kwargs = {}
+        if self.joint_angle_prior is not None:
+            reference_kwargs["reference_angles"] = self.joint_angle_prior.prepare_reference(
+                reference_angles
+            )
         objective_fn = self.get_objective_function(
-            ref_value, fixed_qpos, np.array(last_qpos).astype(np.float32)
+            ref_value, fixed_qpos, np.array(last_qpos).astype(np.float32),
+            **reference_kwargs,
         )
 
         self.opt.set_min_objective(objective_fn)
@@ -408,6 +417,21 @@ class DexPilotOptimizer(Optimizer):
             self.projected_dist,
         ) = self.set_dexpilot_cache(self.num_fingers, eta1, eta2)
 
+    def set_joint_angle_prior(self, prior):
+        """Cache additional bone endpoints in the shared FK/Jacobian pipeline."""
+        self.joint_angle_prior = prior
+        self.computed_link_names = list(dict.fromkeys(
+            self.computed_link_names + prior.robot_link_names
+        ))
+        self.origin_link_indices = torch.tensor([
+            self.computed_link_names.index(name) for name in self.origin_link_names
+        ])
+        self.task_link_indices = torch.tensor([
+            self.computed_link_names.index(name) for name in self.task_link_names
+        ])
+        self.computed_link_indices = self.get_link_indices(self.computed_link_names)
+        prior.bind_robot_links(self.computed_link_names)
+
     @staticmethod
     def generate_link_indices(num_fingers):
         """
@@ -458,8 +482,11 @@ class DexPilotOptimizer(Optimizer):
         return projected, s2_project_index_origin, s2_project_index_task, projected_dist
 
     def get_objective_function(
-        self, target_vector: np.ndarray, fixed_qpos: np.ndarray, last_qpos: np.ndarray
+        self, target_vector: np.ndarray, fixed_qpos: np.ndarray, last_qpos: np.ndarray,
+        reference_angles=None,
     ):
+        if self.joint_angle_prior is not None:
+            reference_angles = self.joint_angle_prior.prepare_reference(reference_angles)
         qpos = np.zeros(self.num_joints)
         qpos[self.idx_pin2fixed] = fixed_qpos
 
@@ -547,6 +574,10 @@ class DexPilotOptimizer(Optimizer):
                 / (robot_vec.shape[0])
             ).sum()
             huber_distance = huber_distance.sum()
+            if self.joint_angle_prior is not None:
+                huber_distance = huber_distance + self.joint_angle_prior.loss(
+                    torch_body_pos, reference_angles
+                )
             result = huber_distance.cpu().detach().item()
 
             if grad.size > 0:

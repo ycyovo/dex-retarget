@@ -16,12 +16,14 @@ class SeqRetargeting:
         has_joint_limits=True,
         lp_filter: Optional[LPFilter] = None,
         joint_limits_override: Optional[np.ndarray] = None,
+        strict_joint_limits: bool = False,
     ):
         self.optimizer = optimizer
         robot = self.optimizer.robot
 
         # Joint limit
         self.has_joint_limits = has_joint_limits
+        self.strict_joint_limits = strict_joint_limits
         joint_limits = np.ones_like(robot.joint_limits)
         joint_limits[:, 0] = -1e4  # a large value is equivalent to no limit
         joint_limits[:, 1] = 1e4
@@ -41,7 +43,10 @@ class SeqRetargeting:
             ):
                 raise ValueError("joint_limits must be finite and ordered")
             joint_limits[:] = source_limits
-            self.optimizer.set_joint_limit(joint_limits[self.optimizer.idx_pin2target])
+            self.optimizer.set_joint_limit(
+                joint_limits[self.optimizer.idx_pin2target],
+                epsilon=0.0 if strict_joint_limits else 1e-3,
+            )
         self.joint_limits = joint_limits[self.optimizer.idx_pin2target]
         self.fixed_joint_limits = joint_limits[self.optimizer.idx_pin2fixed]
 
@@ -125,8 +130,33 @@ class SeqRetargeting:
 
         self.is_warm_started = True
 
-    def retarget(self, ref_value, fixed_qpos=np.array([])):
+    def retarget(
+        self, ref_value, fixed_qpos=np.array([]), *,
+        human_joint_pos=None, reference_angles=None,
+    ):
+        """Retarget one frame, optionally adding a configured DexPilot angle prior.
+
+        human_joint_pos: (21, 3) MediaPipe landmarks, used to compute bone angles.
+        reference_angles: alternatively supply unsigned geometric angles in
+            joint_angle_mapping order, in radians [0, pi], not robot qpos.
+            Both inputs are ignored when the prior is disabled.
+        """
         tic = time.perf_counter()
+
+        angle_prior = self.optimizer.joint_angle_prior
+        reference_kwargs = {}
+        if angle_prior is not None:
+            if human_joint_pos is not None and reference_angles is not None:
+                raise ValueError("Provide either human_joint_pos or reference_angles, not both")
+            if reference_angles is None:
+                if human_joint_pos is None:
+                    raise ValueError(
+                        "Enabled bone angle prior requires human_joint_pos or reference_angles"
+                    )
+                reference_angles = angle_prior.estimate_reference(human_joint_pos)
+            else:
+                reference_angles = angle_prior.prepare_reference(reference_angles)
+            reference_kwargs["reference_angles"] = reference_angles
 
         qpos = self.optimizer.retarget(
             ref_value=ref_value.astype(np.float32),
@@ -134,7 +164,10 @@ class SeqRetargeting:
             last_qpos=np.clip(
                 self.last_qpos, self.joint_limits[:, 0], self.joint_limits[:, 1]
             ),
+            **reference_kwargs,
         )
+        if self.strict_joint_limits:
+            qpos = np.clip(qpos, self.joint_limits[:, 0], self.joint_limits[:, 1])
         self.accumulated_time += time.perf_counter() - tic
         self.num_retargeting += 1
         self.last_qpos = qpos
@@ -147,6 +180,9 @@ class SeqRetargeting:
 
         if self.filter is not None:
             robot_qpos = self.filter.next(robot_qpos)
+        if self.strict_joint_limits and self.optimizer.adaptor is not None:
+            # Preserve the hard affine relation even after filter roundoff.
+            robot_qpos = self.optimizer.adaptor.forward_qpos(robot_qpos)
         return robot_qpos
 
     def set_qpos(self, robot_qpos: np.ndarray):
@@ -158,6 +194,8 @@ class SeqRetargeting:
         robot_qpos[self.optimizer.idx_pin2target] = self.last_qpos
         if fixed_qpos is not None:
             robot_qpos[self.optimizer.idx_pin2fixed] = fixed_qpos
+        if self.optimizer.adaptor is not None:
+            robot_qpos = self.optimizer.adaptor.forward_qpos(robot_qpos)
         return robot_qpos
 
     def verbose(self):

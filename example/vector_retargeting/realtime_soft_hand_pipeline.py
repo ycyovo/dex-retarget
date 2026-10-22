@@ -314,8 +314,9 @@ def run_pipeline(
 
             tic = time.perf_counter()
             try:
-                import ipdb; ipdb.set_trace()
-                qpos = retargeting.retarget(ref_value, fixed_qpos=fixed_qpos)
+                qpos = retargeting.retarget(
+                    ref_value, fixed_qpos=fixed_qpos, human_joint_pos=joint_pos
+                )
             except Exception as exc:
                 stats.add_failure()
                 print(f"[soft_hand][WARN] Retargeting failed: {exc}")

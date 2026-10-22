@@ -222,7 +222,9 @@ def retarget_video(
                             # print(f"[soft_hand] Saved joint debug image: {debug_path}")
 
                 # qpos = retargeting.retarget(ref_value)
-                qpos = retargeting.retarget(ref_value, fixed_qpos=fixed_qpos)
+                qpos = retargeting.retarget(
+                    ref_value, fixed_qpos=fixed_qpos, human_joint_pos=joint_pos
+                )
                 
                 data.append(qpos)
                 pbar.update(1)

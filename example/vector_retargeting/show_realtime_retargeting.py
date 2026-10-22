@@ -145,7 +145,7 @@ def start_retargeting(queue: multiprocessing.Queue, robot_dir: str, config_path:
                 origin_indices = indices[0, :]
                 task_indices = indices[1, :]
                 ref_value = joint_pos[task_indices, :] - joint_pos[origin_indices, :]
-            qpos = retargeting.retarget(ref_value)
+            qpos = retargeting.retarget(ref_value, human_joint_pos=joint_pos)
             robot.set_qpos(qpos[retargeting_to_sapien])
 
         for _ in range(2):

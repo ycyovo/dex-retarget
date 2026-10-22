@@ -29,7 +29,7 @@ def profile_retargeting(retargeting: SeqRetargeting, data: List[np.ndarray]):
             task_indices = indices[1, :]
             ref_value = joint_pos[task_indices, :] - joint_pos[origin_indices, :]
         tic = time.perf_counter()
-        _ = retargeting.retarget(ref_value)
+        _ = retargeting.retarget(ref_value, human_joint_pos=joint_pos)
         tac = time.perf_counter()
         total_time += tac - tic
 

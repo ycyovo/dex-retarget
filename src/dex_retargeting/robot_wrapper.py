@@ -1,4 +1,5 @@
 from typing import List
+import xml.etree.ElementTree as ET
 
 import numpy as np
 import numpy.typing as npt
@@ -11,8 +12,33 @@ class RobotWrapper:
     """
 
     def __init__(self, urdf_path: str, use_collision=False, use_visual=False):
-        # Create robot model and data
-        self.model: pin.Model = pin.buildModelFromUrdf(urdf_path)
+        # Pinocchio represents URDF continuous joints as SO(2), for which nq != nv.
+        # Dex-Retarget's optimizer uses one scalar qpos per joint, so create an
+        # in-memory revolute representation with broad numerical bounds. These
+        # are only for the Pinocchio backend; task limits belong to retargeting
+        # configuration and the source URDF remains limit-free.
+        root = ET.parse(urdf_path).getroot()
+        continuous_joints = [
+            joint for joint in root.findall("joint")
+            if joint.get("type") == "continuous"
+        ]
+        if continuous_joints:
+            for joint in continuous_joints:
+                joint.set("type", "revolute")
+                limit = joint.find("limit")
+                if limit is None:
+                    limit = ET.SubElement(joint, "limit")
+                # Match SeqRetargeting's numerical domain when physical limits
+                # are disabled, while allowing YAML joint_limits to tighten it.
+                limit.set("lower", "-10000")
+                limit.set("upper", "10000")
+                limit.attrib.setdefault("effort", "1")
+                limit.attrib.setdefault("velocity", "1")
+            self.model: pin.Model = pin.buildModelFromXML(
+                ET.tostring(root, encoding="unicode")
+            )
+        else:
+            self.model = pin.buildModelFromUrdf(urdf_path)
         self.data: pin.Data = self.model.createData()
 
         if use_visual or use_collision:

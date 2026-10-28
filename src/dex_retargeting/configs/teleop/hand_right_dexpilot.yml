@@ -1,0 +1,69 @@
+# Provisional example integration. See assets/scripts/build_hand_compat.py.
+# The compatibility URDF preserves soft_hand names/dimension; the source has 24 DOF.
+# Signs/zeros are NOT calibrated.
+retargeting:
+  type: DexPilot
+  # urdf_path: hand/hand_compat.urdf
+  urdf_path: hand/urdf/hand.urdf
+  # urdf_path: soft_hand/soft_hand_right_hand_only.urdf
+  target_joint_names: [
+    thumb_joint_1, thumb_joint_2, thumb_joint_3, thumb_joint_4,
+    index_joint_1, index_joint_2, index_joint_3, index_joint_4,
+    middle_joint_1, middle_joint_2, middle_joint_3, middle_joint_4,
+    ring_joint_1, ring_joint_2, ring_joint_3, ring_joint_4,
+    little_joint_1, little_joint_2, little_joint_3, little_joint_4
+  ]
+  # One independent flexion coordinate per PIP/DIP pair. New-hand PIP
+  # flexion is negative and DIP flexion is positive: q4 = -2/3 * q3.
+  # The positive output angles still satisfy DIP = 2/3 * PIP.
+  # Four DIP followers leave 16 independent variables and 24 robot outputs.
+  joint_couplings:
+    index_joint_4: {source: index_joint_3, multiplier: -0.6666666666666666, offset: 0.0}
+    middle_joint_4: {source: middle_joint_3, multiplier: -0.6666666666666666, offset: 0.0}
+    ring_joint_4: {source: ring_joint_3, multiplier: -0.6666666666666666, offset: 0.0}
+    little_joint_4: {source: little_joint_3, multiplier: -0.6666666666666666, offset: 0.0}
+  wrist_link_name: base_link
+  finger_tip_link_names: [thumb_tip, index_tip, middle_tip, ring_tip, little_tip]
+  scaling_factor: 1.5
+  low_pass_alpha: 0.2
+  # Geometric angle loss remains disabled independently of hard coupling.
+  joint_angle_weight: 0.0
+  # Continuous joints have no physical angle bounds in either new-hand URDF.
+  # Configure calibrated software ranges here, in radians; currently unset.
+  # Example entry: thumb_joint_2: [lower_radians, upper_radians]
+  has_joint_limits: true
+  joint_limits: {
+    index_joint_1: [-0.31, 0.31],
+    middle_joint_1: [-0.31, 0.31],
+    ring_joint_1: [-0.31, 0.31],
+    little_joint_1: [-0.31, 0.31],
+    # index_joint_1: [0, 0],
+    # middle_joint_1: [0, 0],
+    # ring_joint_1: [0, 0],
+    # little_joint_1: [0, 0],
+    # 18 degree
+
+    thumb_joint_1: [0,1.23],
+    # thumb_joint_2: [1.2, 2.0944],
+    # thumb_joint_1: [-1.5708,0.0],
+    thumb_joint_2: [-3 ,0],
+    thumb_joint_3: [-1.23, 0.0],
+    thumb_joint_4: [0.0, 1.23],
+
+    index_joint_2: [-1.5708,0.0], 
+    index_joint_3: [-1.5708,0.0], 
+    index_joint_4: [0.0,1.5708], 
+
+    middle_joint_2: [-1.5708,0.0], 
+    middle_joint_3: [-1.5708,0.0], 
+    middle_joint_4: [0.0,1.5708], 
+
+    ring_joint_2: [-1.5708,0.0],
+    ring_joint_3: [-1.5708,0.0],
+    ring_joint_4: [0.0,1.5708],
+
+    little_joint_2: [-1.5708,0.0],
+    little_joint_3: [-1.5708,0.0],
+    little_joint_4: [0.0,1.5708]
+  }
+

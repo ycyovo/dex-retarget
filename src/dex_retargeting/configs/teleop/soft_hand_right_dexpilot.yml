@@ -34,7 +34,7 @@ retargeting:
 
   # 比较几何夹角：L = L_DexPilot + weight * mean(((theta_robot - theta_human) / range)^2).
   # 0 完全关闭新增项，保持现有 DexPilot 行为。
-  joint_angle_weight: 1
+  joint_angle_weight: 0
 
   # 按几何夹角名称覆盖归一化跨度，单位 rad，范围 (0, pi]。
   # 默认全部用 pi（无符号夹角域 [0, pi]），不再从机器人 qpos 限位推断。

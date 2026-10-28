@@ -37,15 +37,9 @@ retargeting:
     middle_joint_1: [-0.31, 0.31],
     ring_joint_1: [-0.31, 0.31],
     little_joint_1: [-0.31, 0.31],
-    # index_joint_1: [0, 0],
-    # middle_joint_1: [0, 0],
-    # ring_joint_1: [0, 0],
-    # little_joint_1: [0, 0],
     # 18 degree
 
     thumb_joint_1: [0,1.23],
-    # thumb_joint_2: [1.2, 2.0944],
-    # thumb_joint_1: [-1.5708,0.0],
     thumb_joint_2: [-3 ,0],
     thumb_joint_3: [-1.23, 0.0],
     thumb_joint_4: [0.0, 1.23],
@@ -65,5 +59,33 @@ retargeting:
     little_joint_2: [-1.5708,0.0],
     little_joint_3: [-1.5708,0.0],
     little_joint_4: [0.0,1.5708]
+
+
+
+    # index_joint_1: [0, 0],
+    # middle_joint_1: [0, 0],
+    # ring_joint_1: [0, 0],
+    # little_joint_1: [0, 0],
+
+    # # thumb_joint_1: [0.0, 0.0],
+    # # thumb_joint_2: [0.0, 0.0],
+    # # thumb_joint_3: [0.0, 0.0],
+    # # thumb_joint_4: [0.0, 0.0],
+
+    # index_joint_2: [0.0, 0.0], 
+    # index_joint_3: [0.0, 0.0], 
+    # index_joint_4: [0.0, 0.0], 
+
+    # middle_joint_2: [0.0, 0.0], 
+    # middle_joint_3: [0.0, 0.0], 
+    # middle_joint_4: [0.0, 0.0], 
+
+    # ring_joint_2: [0.0, 0.0],
+    # ring_joint_3: [0.0, 0.0],
+    # ring_joint_4: [0.0, 0.0],
+
+    # little_joint_2: [0.0,0.0],
+    # little_joint_3: [0.0,0.0],
+    # little_joint_4: [0.0,0.0]
   }
 

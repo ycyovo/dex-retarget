@@ -11,3 +11,10 @@ dist/
 *.egg-info/
 .DS_Store
 
+# Optional robot assets retained locally, excluded from the repository.
+/assets/robots/arms/
+/assets/robots/hands/leap_hand/
+/SoftHandGrasping/
+/assets/robots/hands/dclaw_gripper/
+/assets/robots/hands/ability_hand/
+

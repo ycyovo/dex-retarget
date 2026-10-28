@@ -11,8 +11,98 @@ camera/video stream
 -> timing/FPS report
 ```
 
-It does not start SAPIEN rendering yet. Use it first to check whether the
-front half of the realtime chain can keep up with the video stream.
+Use it first without visualization to check throughput; add `--sim-display`
+to show the retargeted model in SAPIEN.
+
+## 新手 hand 模型（先跑通 example）
+
+### 先检查 URDF 零位
+
+不运行检测和 retargeting，所有活动关节固定为 **0°**，根坐标为单位变换，
+也不做物理步进。默认显示当前新手兼容模型，可用鼠标旋转、缩放：
+
+```bash
+python example/vector_retargeting/view_hand_zero_pose.py
+```
+
+查看含项目零位修正的 24 关节 CAD 模型，或原来的 soft_hand：
+
+```bash
+python example/vector_retargeting/view_hand_zero_pose.py \
+  --urdf-path assets/robots/hands/hand/urdf/hand.urdf
+python example/vector_retargeting/view_hand_zero_pose.py \
+  --urdf-path assets/robots/hands/soft_hand/soft_hand_right_hand_only.urdf
+```
+
+`--view front|back|side|top` 设置初始视角（分别从 -Y、+Y、+X、+Z 观察）。
+无窗口截图使用 `--headless --output /tmp/hand_zero.png`。
+脚本的地面、灯光和环境贴图与 realtime viewer 一致。默认保留 URDF 材质；
+可选 RGB 覆盖模型颜色（每个分量范围 0 到 1），例如：
+
+```bash
+python example/vector_retargeting/view_hand_zero_pose.py --hand-color 0.35 0.65 0.9
+```
+
+脚本会打印所有活动关节名称和 0° 值。这里的零位由 URDF 的 joint origin
+决定，不等同于手指伸直；反折等装配问题也会直接显示出来。
+
+### 运行 retargeting
+
+在仓库根目录运行，使用已安装本项目及 MediaPipe/SAPIEN 的 Python 环境：
+
+```bash
+python example/vector_retargeting/realtime_soft_hand_pipeline.py \
+  --config-path src/dex_retargeting/configs/teleop/hand_right_dexpilot.yml \
+  --camera-source example/vector_retargeting/data/hand_video_2.mp4 \
+  --max-frames 300 --report-every 30
+```
+
+查看新手模型时，在以上命令末尾添加 `--sim-display`；实时相机将
+`--camera-source` 换成 `0`。`--display` 可选，用于显示检测骨架。
+新配置的 URDF 同时用于求解和显示，不需要修改渲染代码或 PneumaticSystem。
+不传 `--config-path` 时仍使用原 soft_hand 默认配置。
+
+新手配置现已启用四指 PIP/DIP 硬联动：每指独立优化 PIP，DIP 由
+`q4 = -2/3 * q3` 得到，正屈曲角满足 `DIP = 2/3 * PIP`。
+新手 q3、q4 屈曲符号相反，因此 multiplier 为负。独立优化变量为 16 个；
+源模型仍返回 24 维 qpos（包括四个保持零位的 mount），兼容模型返回 20 维。
+PneumaticSystem 已使用新手配置，联动 PIP 输出直接读取关节坐标，跳过旧 FK 弯角估计。
+
+当前只验证 example 链路，保留原 20 个关节名和 link 名。临时约定如下：
+
+- `hand/urdf/hand.urdf` 中，中指、无名指和小指的 CAD joint3 坐标系 `rpy`
+  已对齐食指 joint3，修复这三指在零位朝手掌反折的问题。原模型各指的
+  横向分叉位置和网格保留；`hand_compat.urdf` 从该模型生成。
+- 拇指四关节直接改为旧名称；其余四指暂将 CAD joint1 固定在 0，
+  CAD joint2～joint5 对应旧 joint_1～joint_4，保留全部结构网格。
+- 拇指零位修正在 `hand/urdf/hand.urdf` 的前两个 joint origin 中：相对修正前
+  的 CAD 导出坐标，`q_export1 = q1 + pi`、`q_export2 = q2 + pi/2`；后两关节
+  没有偏置。第一段改为朝食指侧，第二段消除反折，使拇指在 q=0 时向外、
+  向指尖方向展开。安装点 xyz、旋转轴、网格、质量惯量和其余四指均未因此改动。
+  这是经多视角检查的 **example 暂定零位，不是硬件标定**，也不保证旧气动角度语义。
+  生成器原样复制修正后的 origin，不重复叠加零偏；零位查看器仍把 qpos 设为 0。
+- `assets/robots/hands/hand/hand_origin.urdf` 保存拇指零位补偿前的 URDF 状态，
+  可用于直接对照两项拇指 `rpy`。该快照保留了此前已做的中指、无名指、小指
+  joint3 四指展开修正，因此不是最初未经修改的 SolidWorks 导出文件。
+- 新手源 URDF 及兼容 URDF 的活动关节使用 `continuous`，没有 `<limit>`。
+  `RobotWrapper` 为 Pinocchio 转换为内存中的标量角度表示，保留每关节一个 qpos，
+  数值计算域为 ±10000 rad（不是机械限位）。实际软件角度范围由
+  `hand_right_dexpilot.yml` 的 `joint_limits` 设置，单位 rad，目前为空、待标定。
+  新手使用自己的 YAML 限位，联动采用上述适配符号后的 2/3 比例，几何角损失关闭；
+  完整机械零位及实物角度映射尚未标定。
+- 原始 `hand/urdf/hand.urdf` 与兼容模型均包含五个固定虚拟 `*_tip` frame；
+  拇指挂在 `thumb_link4`，其余四指挂在各自 `*_link5`。tip 坐标暂用末节 STL
+  包围盒的 +Y 端面中心估算，兼容模型生成器会复用源 URDF 的 frame，不重复添加；
+  后续可用实测指尖位置替换。
+- 保留语义关节命名不表示气动角度语义已校准；PneumaticSystem 已切换新手模型、
+  修正屈曲符号并启用上述联动，拇指参考零位和实物映射仍待验证。
+
+CAD 更新后可重新生成兼容模型；运行验证不需要相机和窗口：
+
+```bash
+python assets/scripts/build_hand_compat.py
+python tests/test_hand_compat.py
+```
 
 ## Script
 
@@ -60,6 +150,12 @@ python3 example/vector_retargeting/realtime_soft_hand_pipeline.py \
 Use `--display` to show the camera frame with the detected hand skeleton.
 Press `q` in the OpenCV window to stop.
 
+With `--display`, the pipeline removes `SESSION_MANAGER` from its process
+environment before initializing the preview. This prevents OpenCV's Qt backend
+from using a stale desktop session connection that can terminate the process
+with `ICE default IO error handler doing an exit()`. The parent terminal's
+environment is unaffected.
+
 ```bash
 python3 example/vector_retargeting/realtime_soft_hand_pipeline.py \
   --camera-source 0 \
@@ -68,6 +164,19 @@ python3 example/vector_retargeting/realtime_soft_hand_pipeline.py \
 
 For pure FPS testing, keep `--display` off because OpenCV UI rendering can
 affect the measured throughput.
+
+### 新手拇指根部输入适配
+
+新手源模型与 `hand_compat.urdf` 使用完整腕部坐标对齐，并通过
+`hand_input_adaptation.py` 补偿人手与模型拇指根部在掌面深度方向上的安装差异。
+补偿作用于优化前的指尖目标，保留实际根部到指尖的深度变化；不会将
+`thumb_joint_1` 锁零，也不要求启用 `joint_angle_weight`。近距离捏合时补偿逐渐
+关闭，以保留 DexPilot 的接触目标。旧 soft_hand 继续使用原来的输入处理。
+
+该处理已接入本实时脚本与 `detect_from_video.py`。直接调用库的其他程序
+（包括 PneumaticSystem）需要在自己的输入路径中同步接入，不能只替换 YAML
+就假设已有同样的补偿。模型识别依据当前 CAD link 拓扑；补偿使用新模型
+`base_link` 的 Y 深度轴，后续更改基坐标系时需要一起核对。
 
 ## Useful Options
 

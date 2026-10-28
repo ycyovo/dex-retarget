@@ -1,3 +1,4 @@
+import os
 import time
 from pathlib import Path
 from typing import Literal, Optional, Union
@@ -183,22 +184,31 @@ def run_pipeline(
     width: Optional[int] = None,
     height: Optional[int] = None,
     fps: Optional[float] = None,
+    config_path: Optional[Path] = None,
 ):
+    if display:
+        # OpenCV's Qt backend otherwise connects to the inherited desktop
+        # session manager. A stale/broken ICE connection can exit the process
+        # from native code. This preview window needs no session restoration.
+        os.environ.pop("SESSION_MANAGER", None)
+
     try:
         from detect_from_video import compute_soft_hand_wrist_alignment
+        from hand_input_adaptation import adapt_new_hand_thumb_depth
         from single_hand_detector import SingleHandDetector
     except ModuleNotFoundError:
         from example.vector_retargeting.detect_from_video import (
             compute_soft_hand_wrist_alignment,
         )
+        from example.vector_retargeting.hand_input_adaptation import (
+            adapt_new_hand_thumb_depth,
+        )
         from example.vector_retargeting.single_hand_detector import SingleHandDetector
 
-    config_path = get_default_config_path(
-        RobotName.soft,
-        # RobotName.allegro,
-        RetargetingType.dexpilot,
-        HandType.right,
-    )
+    if config_path is None:
+        config_path = get_default_config_path(
+            RobotName.soft, RetargetingType.dexpilot, HandType.right,
+        )
     robot_dir = (
         Path(__file__).absolute().parent.parent.parent / "assets" / "robots" / "hands"
     )
@@ -305,6 +315,10 @@ def run_pipeline(
                 # soft_hand/base_link ref vectors. This must match the Task 2
                 # offline pipeline before the qpos is used in realtime.
                 ref_value = ref_value @ soft_hand_wrist_alignment
+                ref_value = adapt_new_hand_thumb_depth(
+                    retargeting, ref_value,
+                    joint_pos @ soft_hand_wrist_alignment,
+                )
             except Exception as exc:
                 stats.add_ref(time.perf_counter() - tic)
                 stats.add_failure()
@@ -334,6 +348,7 @@ def run_pipeline(
                 break
     finally:
         cap.release()
+        detector.hand_detector.close()
         if display:
             cv2.destroyAllWindows()
         if viewer is not None:
@@ -354,6 +369,7 @@ def main(
     width: Optional[int] = None,
     height: Optional[int] = None,
     fps: Optional[float] = None,
+    config_path: Optional[Path] = None,
 ):
     """
     Run the realtime pipeline: camera/video -> MediaPipe -> DexPilot qpos.
@@ -368,6 +384,7 @@ def main(
         width: Optional requested capture width.
         height: Optional requested capture height.
         fps: Optional requested capture FPS.
+        config_path: Optional retargeting YAML. Defaults to the existing soft_hand config.
     """
     run_pipeline(
         camera_source=camera_source,
@@ -379,6 +396,7 @@ def main(
         width=width,
         height=height,
         fps=fps,
+        config_path=config_path,
     )
 
 

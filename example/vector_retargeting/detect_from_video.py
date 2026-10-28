@@ -17,9 +17,17 @@ from dex_retargeting.retargeting_config import RetargetingConfig
 from dex_retargeting.seq_retarget import SeqRetargeting
 
 try:
+    from hand_input_adaptation import (
+        adapt_new_hand_thumb_depth,
+        new_hand_thumb_root_link,
+    )
     from single_hand_detector import SingleHandDetector
     from hand_skeleton_visualization import save_hand_skeleton_debug_image
 except ModuleNotFoundError:
+    from example.vector_retargeting.hand_input_adaptation import (
+        adapt_new_hand_thumb_depth,
+        new_hand_thumb_root_link,
+    )
     from example.vector_retargeting.single_hand_detector import SingleHandDetector
     from example.vector_retargeting.hand_skeleton_visualization import (
         save_hand_skeleton_debug_image,
@@ -114,7 +122,10 @@ def compute_soft_hand_wrist_alignment(
         target_vecs=robot_vec[len_proj:],
     )
     # return full_rotation
-    return partial_row_rotation(full_rotation, SOFT_HAND_WRIST_ALIGNMENT_ALPHA)
+    # A partial rotation leaves different coordinate errors for the old XY
+    # palm and new XZ palm. Use the full frame conversion for the new model.
+    alpha = 1.0 if new_hand_thumb_root_link(retargeting) else SOFT_HAND_WRIST_ALIGNMENT_ALPHA
+    return partial_row_rotation(full_rotation, alpha)
 
 
 def retarget_video(
@@ -202,6 +213,10 @@ def retarget_video(
                                     3, dtype=np.float32
                                 )
                         ref_value = ref_value @ soft_hand_wrist_alignment
+                        ref_value = adapt_new_hand_thumb_depth(
+                            retargeting, ref_value,
+                            joint_pos @ soft_hand_wrist_alignment,
+                        )
                         current_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
                         if (
                             debug_joint_vis_path is not None

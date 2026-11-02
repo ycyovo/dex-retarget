@@ -59,33 +59,5 @@ retargeting:
     little_joint_2: [-1.4,0.0],
     little_joint_3: [-1.5708,0.0],
     little_joint_4: [0.0,1.5708]
-
-
-
-    # index_joint_1: [0, 0],
-    # middle_joint_1: [0, 0],
-    # ring_joint_1: [0, 0],
-    # little_joint_1: [0, 0],
-
-    # # thumb_joint_1: [0.0, 0.0],
-    # # thumb_joint_2: [0.0, 0.0],
-    # # thumb_joint_3: [0.0, 0.0],
-    # # thumb_joint_4: [0.0, 0.0],
-
-    # index_joint_2: [0.0, 0.0], 
-    # index_joint_3: [0.0, 0.0], 
-    # index_joint_4: [0.0, 0.0], 
-
-    # middle_joint_2: [0.0, 0.0], 
-    # middle_joint_3: [0.0, 0.0], 
-    # middle_joint_4: [0.0, 0.0], 
-
-    # ring_joint_2: [0.0, 0.0],
-    # ring_joint_3: [0.0, 0.0],
-    # ring_joint_4: [0.0, 0.0],
-
-    # little_joint_2: [0.0,0.0],
-    # little_joint_3: [0.0,0.0],
-    # little_joint_4: [0.0,0.0]
   }
 

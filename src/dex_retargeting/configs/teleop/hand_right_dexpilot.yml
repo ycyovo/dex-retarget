@@ -33,10 +33,10 @@ retargeting:
   # Example entry: thumb_joint_2: [lower_radians, upper_radians]
   has_joint_limits: true
   joint_limits: {
-    index_joint_1: [-0.31, 0.31],
-    middle_joint_1: [-0.31, 0.31],
-    ring_joint_1: [-0.31, 0.31],
-    little_joint_1: [-0.31, 0.31],
+    index_joint_1: [-0.27, 0.27],
+    middle_joint_1: [-0.27, 0.27],
+    ring_joint_1: [-0.27, 0.27],
+    little_joint_1: [-0.27, 0.27],
     # 18 degree
 
     thumb_joint_1: [0,1.23],
@@ -44,19 +44,19 @@ retargeting:
     thumb_joint_3: [-1.23, 0.0],
     thumb_joint_4: [0.0, 1.23],
 
-    index_joint_2: [-1.5708,0.0], 
+    index_joint_2: [-1.4,0.0], 
     index_joint_3: [-1.5708,0.0], 
     index_joint_4: [0.0,1.5708], 
 
-    middle_joint_2: [-1.5708,0.0], 
+    middle_joint_2: [-1.4,0.0], 
     middle_joint_3: [-1.5708,0.0], 
     middle_joint_4: [0.0,1.5708], 
 
-    ring_joint_2: [-1.5708,0.0],
+    ring_joint_2: [-1.4,0.0],
     ring_joint_3: [-1.5708,0.0],
     ring_joint_4: [0.0,1.5708],
 
-    little_joint_2: [-1.5708,0.0],
+    little_joint_2: [-1.4,0.0],
     little_joint_3: [-1.5708,0.0],
     little_joint_4: [0.0,1.5708]
 
